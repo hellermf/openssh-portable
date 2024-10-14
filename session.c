@@ -255,6 +255,19 @@ auth_input_request_forwarding(struct ssh *ssh, struct passwd * pw)
 }
 
 static void
+display_loginmsg_dbg(char * dbg)
+{
+	int r;
+
+	if (sshbuf_len(loginmsg) == 0)
+		return;
+	if ((r = sshbuf_put_u8(loginmsg, 0)) != 0)
+		fatal_fr(r, "sshbuf_put_u8");
+	printf("begin %s\n%s\nend %s\n", dbg, (char *)sshbuf_ptr(loginmsg), dbg);
+	sshbuf_reset(loginmsg);
+}
+
+static void
 display_loginmsg(void)
 {
 	int r;
@@ -767,7 +780,7 @@ do_login(struct ssh *ssh, Session *s, const char *command)
 	if (check_quietlogin(s, command))
 		return;
 
-	display_loginmsg();
+	display_loginmsg_dbg("do_login");
 
 	do_motd();
 }
@@ -1541,13 +1554,13 @@ do_child(struct ssh *ssh, Session *s, const char *command)
 	 * login then display them too.
 	 */
 	if (!check_quietlogin(s, command))
-		display_loginmsg();
+		display_loginmsg_dbg("do_child");
 #endif /* HAVE_OSF_SIA */
 
 #ifdef USE_PAM
 	if (options.use_pam && !is_pam_session_open()) {
 		debug3("PAM session not opened, exiting");
-		display_loginmsg();
+		display_loginmsg_dbg("session.c sess not open");
 		exit(254);
 	}
 #endif

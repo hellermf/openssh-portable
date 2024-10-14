@@ -638,7 +638,7 @@ sshpam_store_conv(int n, sshpam_const struct pam_message **msg,
 		switch (PAM_MSG_MEMBER(msg, i, msg_style)) {
 		case PAM_ERROR_MSG:
 		case PAM_TEXT_INFO:
-			if ((r = sshbuf_putf(loginmsg, "%s\n",
+			if ((r = sshbuf_putf(loginmsg, "sshpam_store_conv->%s<-sshpam_store_conv\n",
 			    PAM_MSG_MEMBER(msg, i, msg))) != 0)
 				fatal("%s: buffer error: %s",
 				    __func__, ssh_err(r));
@@ -914,10 +914,12 @@ sshpam_query(void *ctx, char **name, char **info,
 			if (**prompts != NULL) {
 				/* drain any accumulated messages */
 				debug("PAM: %s", **prompts);
+				sshbuf_putf(loginmsg, "start sshpam_query PAM_SUCCESS\n");
 				if ((r = sshbuf_put(loginmsg, **prompts,
 				    strlen(**prompts))) != 0)
 					fatal("%s: buffer error: %s",
 					    __func__, ssh_err(r));
+				sshbuf_putf(loginmsg, "end sshpam_query PAM_SUCCESS\n");
 				free(**prompts);
 				**prompts = NULL;
 			}
@@ -1315,7 +1317,7 @@ sshpam_passwd_conv(int n, sshpam_const struct pam_message **msg,
 		case PAM_TEXT_INFO:
 			len = strlen(PAM_MSG_MEMBER(msg, i, msg));
 			if (len > 0) {
-				if ((r = sshbuf_putf(loginmsg, "%s\n",
+				if ((r = sshbuf_putf(loginmsg, "sshpam_passwd_conv->%s<-sshpam_passwd_conv\n",
 				    PAM_MSG_MEMBER(msg, i, msg))) != 0)
 					fatal("%s: buffer error: %s",
 					    __func__, ssh_err(r));
